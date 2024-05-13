@@ -33,22 +33,21 @@ def read_and_plot_data(*filenames):
             new_iterations = np.linspace(min(iterations), max(iterations), 1000)
             new_cost = f(new_iterations)
 
-            plt.plot(new_iterations, new_cost, linestyle='-', linewidth=1.5, alpha=1, label=os.path.splitext(os.path.basename(filename))[0])
+            plt.plot(new_iterations, new_cost, linestyle='-', linewidth=2, alpha=1, label=os.path.splitext(os.path.basename(filename))[0])
 
     plt.xlabel('Iterations')
-    plt.ylabel('Cost')
-    plt.title('Cost vs Iterations')
+    plt.ylabel('Cost') 
     plt.grid(True)
-    plt.xticks(range(0, max(iterations) + 10, 100))  # Set x-axis tick marks every 100
-    plt.yticks(range(150, 300, 5))  # Set y-axis tick marks every 50
+    plt.xticks(range(0, 5001, 500))  # Set x-axis tick marks every 100
+    plt.yticks(range(0, 500, 2))  # Set y-axis tick marks every 50
     # plt.xlim(0,1000)
-    plt.ylim(150, 300)
+    plt.ylim(170, 230)
     # plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to be equal
     plt.legend()  # Show legend for all graphs
     plt.show()
 
 # Example usage:
-read_and_plot_data('graphs/Maze1/RRT*_ML.txt','graphs/Maze1/RRT*.txt','graphs/Maze1/RRT#.txt', 'graphs/Maze1/RRTXstatic.txt')
+read_and_plot_data('graphs/Maze_clutter/RRT*_ML.txt','graphs/Maze_clutter/RRT*.txt','graphs/Maze_clutter/RRT#.txt', 'graphs/Maze_clutter/RRTXstatic.txt')
  
 # def read_and_plot_data(filename):
 #     iterations = []

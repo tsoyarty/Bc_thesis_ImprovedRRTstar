@@ -18,7 +18,7 @@ from my_utils import fill_polygon, read_maze_file
 rows, cols = 150, 150
 grid = np.zeros((rows, cols))   
 
-start, goal, Obstacles = read_maze_file("Maze_U")
+start, goal, Obstacles = read_maze_file("Maze_obs")
 for poly in Obstacles:
     fill_polygon(grid, poly)
 
@@ -26,7 +26,7 @@ grid[int(start[0])][int(start[1])] = 0
 grid[int(goal[0])][int(goal[1])] = 0
 
 numIterations = 5000
-stepSize = 30
+stepSize = 10
 goalRegion = plt.Circle((goal[0], goal[1]), 10, color='r', fill = False)
 
 fig = plt.figure("RRT Algorithm")
@@ -39,8 +39,8 @@ ax.add_patch(goalRegion)
 # plt.ylabel('Y')
 plt.xticks([])
 plt.yticks([])
-plt.xlim(0,150)
-plt.ylim(0,150)
+plt.xlim(0,grid.shape[0])
+plt.ylim(0,grid.shape[1])
 
 
 #===============================================================================================
@@ -57,7 +57,7 @@ start_time = time.time()
 # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap4/SimpleMaze.eps', bbox_inches='tight', pad_inches=0)
 # quit()
 # plt.pause(10)
-draw_prediction = False
+draw_prediction = True
 for i in range(rrt.iterations):
     rrt.resetNearestValues()
     # print("Iteration: ",i)
@@ -67,11 +67,10 @@ for i in range(rrt.iterations):
     new = rrt.steerToPoint(rrt.nearestNode, point)
     bool = rrt.isInObstacle(rrt.nearestNode, new)
     if bool == False:
-        rrt.Nears(rrt.randomTree, new, 150)
+        rrt.Nears(rrt.randomTree, new, 40)
         rrt.chooseParent(new)   
         newNode = rrt.addChild(new[0], new[1], i)
-        if i%30==0:
-            print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
+        if i%50==0:
             plt.pause(0.1)   
         rrt.lineDict[(round(rrt.nearestNode.locationX,0),
                       round(rrt.nearestNode.locationY,0), 
@@ -88,7 +87,7 @@ for i in range(rrt.iterations):
             # rrt.addChild(new[0],new[1], i)
             # print("Goal found")
             rrt.resetNearestValues()
-            rrt.Nears(rrt.randomTree, [rrt.goal.locationX, rrt.goal.locationY], 30)
+            rrt.Nears(rrt.randomTree, [rrt.goal.locationX, rrt.goal.locationY], 40)
             rrt.chooseParent([rrt.goal.locationX, rrt.goal.locationY])
             rrt.goal.parent = rrt.nearestNode
             dist_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX,rrt.goal.locationY])
@@ -132,7 +131,7 @@ for i in range(len(rrt.Waypoints)-1):
 
 # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap4/RRTstar_maze'+str(rrt.goal.cost)+'.pdf', bbox_inches='tight', pad_inches=0)
 
-plt.pause(5)
+plt.pause(10)
 
 if draw_prediction:
     for i in range(len(rrt.obsSpace)): 

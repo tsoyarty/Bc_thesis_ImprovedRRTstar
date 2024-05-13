@@ -38,6 +38,7 @@ def read_maze_file(filename):
         for line in file:
             coords = line.strip().split()
             polygon = np.array([[int(coord.split(',')[0]), int(coord.split(',')[1])] for coord in coords])
+            # print(polygon)
             Obstacles.append(polygon)
     return start_point, end_point, Obstacles 
 

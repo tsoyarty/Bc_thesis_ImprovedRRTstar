@@ -188,7 +188,7 @@ int main()
     ob::StateSpacePtr space(new ob::RealVectorStateSpace(2));
 
     // Set the bounds of space to be in [0,1].
-    space->as<ob::RealVectorStateSpace>()->setBounds(0.0, 150.0);
+    space->as<ob::RealVectorStateSpace>()->setBounds(0.0, 149.0);
 
     // Construct a space information instance for this state space
     ob::SpaceInformationPtr si(new ob::SpaceInformation(space));
@@ -208,7 +208,7 @@ int main()
     // validityChecker.addPolygonObstacle(polygonVertices3);
     Point startPoint, goalPoint;
     std::vector<std::vector<Point>> polygons;
-    readFromFile("Maze_U", startPoint, goalPoint, polygons);
+    readFromFile("Maze_obs", startPoint, goalPoint, polygons);
 
     // Add polygons to the validity checker and grid
     for (size_t i = 0; i < polygons.size(); ++i) {
@@ -273,7 +273,7 @@ int main()
     //==================================================================================================================
     //==================================================================================================================
 
-    ob::PlannerPtr optimizingPlanner(new og::RRTstar(si));
+    ob::PlannerPtr optimizingPlanner(new og::RRTXstatic(si));
     
     //==================================================================================================================
     //==================================================================================================================
@@ -285,7 +285,7 @@ int main()
 
     // Attempt to solve the planning problem within one second of
     // planning time 
-    ob::PlannerStatus solved = optimizingPlanner->solve(0.04); 
+    ob::PlannerStatus solved = optimizingPlanner->solve(1); 
     
     if (solved)
     {
