@@ -7,6 +7,8 @@
 #include <ompl/geometric/planners/rrt/RRTstar.h>
 #include <ompl/geometric/planners/rrt/RRT.h>
 #include <ompl/geometric/planners/rrt/RRTsharp.h>
+#include <ompl/geometric/planners/rrt/InformedRRTstar.h>
+#include <ompl/geometric/planners/rrt/LBTRRT.h>
 
 #include <ompl/geometric/planners/prm/PRM.h>
 
@@ -208,7 +210,7 @@ int main()
     // validityChecker.addPolygonObstacle(polygonVertices3);
     Point startPoint, goalPoint;
     std::vector<std::vector<Point>> polygons;
-    readFromFile("Maze_obs", startPoint, goalPoint, polygons);
+    readFromFile("Maze_narrow", startPoint, goalPoint, polygons);
 
     // Add polygons to the validity checker and grid
     for (size_t i = 0; i < polygons.size(); ++i) {
@@ -273,7 +275,7 @@ int main()
     //==================================================================================================================
     //==================================================================================================================
 
-    ob::PlannerPtr optimizingPlanner(new og::RRTXstatic(si));
+    ob::PlannerPtr optimizingPlanner(new og::RRTstar(si));
     
     //==================================================================================================================
     //==================================================================================================================
@@ -285,7 +287,7 @@ int main()
 
     // Attempt to solve the planning problem within one second of
     // planning time 
-    ob::PlannerStatus solved = optimizingPlanner->solve(1); 
+    ob::PlannerStatus solved = optimizingPlanner->solve(3); 
     
     if (solved)
     {

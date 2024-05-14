@@ -33,21 +33,26 @@ def read_and_plot_data(*filenames):
             new_iterations = np.linspace(min(iterations), max(iterations), 1000)
             new_cost = f(new_iterations)
 
-            plt.plot(new_iterations, new_cost, linestyle='-', linewidth=2, alpha=1, label=os.path.splitext(os.path.basename(filename))[0])
+            plt.plot(new_iterations, new_cost, linestyle='-', linewidth=5, alpha=0.5, label=os.path.splitext(os.path.basename(filename))[0])
 
-    plt.xlabel('Iterations')
-    plt.ylabel('Cost') 
+    fontsize_ticks=20
+    fontsize_labels=25
+
+    # plt.xlabel('Iterations', fontsize=fontsize_labels)
+    # plt.ylabel('Cost', fontsize=fontsize_labels) 
     plt.grid(True)
-    plt.xticks(range(0, 5001, 500))  # Set x-axis tick marks every 100
-    plt.yticks(range(0, 500, 2))  # Set y-axis tick marks every 50
+    plt.xticks(range(0, 10001, 2000), fontsize=fontsize_ticks)  # Set x-axis tick marks every 100
+    plt.yticks(range(0, 500, 10), fontsize=fontsize_ticks)  # Set y-axis tick marks every 50
     # plt.xlim(0,1000)
-    plt.ylim(170, 230)
+    plt.ylim(390, 430)
     # plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to be equal
-    plt.legend()  # Show legend for all graphs
+    plt.legend(fontsize=fontsize_ticks)  # Show legend for all graphs
+    plt.savefig('/home/tsoyarty/Desktop/Bc_work/main/graphs/Maze_narrow/graph.pdf', bbox_inches='tight', pad_inches=0)
+    plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/graph_narrow_20pt.pdf', bbox_inches='tight', pad_inches=0)
     plt.show()
 
 # Example usage:
-read_and_plot_data('graphs/Maze_clutter/RRT*_ML.txt','graphs/Maze_clutter/RRT*.txt','graphs/Maze_clutter/RRT#.txt', 'graphs/Maze_clutter/RRTXstatic.txt')
+read_and_plot_data('graphs/Maze_narrow/RRT*_ML.txt','graphs/Maze_narrow/RRT*.txt','graphs/Maze_narrow/InformedRRT*.txt','graphs/Maze_narrow/RRT#.txt', 'graphs/Maze_narrow/RRTXstatic.txt')
  
 # def read_and_plot_data(filename):
 #     iterations = []

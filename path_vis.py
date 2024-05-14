@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np  
 from my_utils import fill_polygon, read_maze_file
  
-start_point, end_point, polygons = read_maze_file('Maze_clutter')
+start_point, end_point, polygons = read_maze_file('Maze_narrow')
 
 rows, cols = 150, 150
 grid = np.zeros((rows, cols))    
@@ -33,14 +33,14 @@ for line in lines:
 # Enable LaTeX rendering
 plt.rc('text', usetex=True)
  
-goalRegion = plt.Circle((x_values[-1], y_values[-1]),5, color="red", fill = False)
+goalRegion = plt.Circle((end_point[0], end_point[1]),5, color="red", fill = False)
 plt.gca().add_patch(goalRegion) 
 # plt.text(75, 10, r'$\mathcal{C}_{\mathrm{free}}$', fontsize=12, ha='center', va='top')
 
 # Plot the path
-plt.plot(x_values, y_values, 'bo-')
-plt.plot(x_values[0], y_values[0], 'go')
-plt.plot(x_values[-1], y_values[-1], 'ro') 
+# plt.plot(x_values, y_values, 'bo-')
+plt.plot(start_point[0], start_point[1], 'go')
+plt.plot(end_point[0], end_point[1], 'ro') 
 
 # plt.plot(x_values, y_values, 'bo-', label=r'$\mathrm{path}$')
 # plt.plot(x_values[0], y_values[0], 'go', label = r'$q_{\mathrm{start}}$')
@@ -55,5 +55,7 @@ plt.yticks([])
 plt.xlim(0,grid.shape[0])
 plt.ylim(0,grid.shape[1])
 # Set axis equal to ensure the circle looks like a circle 
-# plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap2/ConfigSpace.eps', bbox_inches='tight', pad_inches=0)
+plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/Maze_narrow.pdf', bbox_inches='tight', pad_inches=0)
+plt.savefig('/home/tsoyarty/Desktop/Bc_work/main/graphs/Maze_narrow/Maze_narrow.pdf', bbox_inches='tight', pad_inches=0)
+    
 plt.show()

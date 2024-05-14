@@ -85,7 +85,7 @@ class RRTalgo():
     #find unit vector between 2 points which from a vector
     def unitVector(self, locationStart, locationEnd):
         v = np.array([locationEnd[0] - locationStart.locationX, locationEnd[1] - locationStart.locationY])
-        u_hat = 0
+        u_hat = [0,0]
         if np.linalg.norm(v) != 0:
             u_hat = v/np.linalg.norm(v)
         return u_hat
@@ -229,7 +229,7 @@ class RRTalgo():
             else:
                 self.appendSpace(x,"free") 
             # elif not np.allclose(x, np.array([self.goal.locationX,self.goal.locationY])):
-            #     self.appendSpace(x,"free")   
+                # self.appendSpace(x,"free")   
         # print(self.obsSpace)
         # plot_density(self.obsSpace)
         # plot_density(self.freeSpace)

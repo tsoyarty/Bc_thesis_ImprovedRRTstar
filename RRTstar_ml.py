@@ -18,15 +18,15 @@ from my_utils import fill_polygon, read_maze_file
 rows, cols = 150, 150
 grid = np.zeros((rows, cols))   
 
-start, goal, Obstacles = read_maze_file("Maze_obs")
+start, goal, Obstacles = read_maze_file("Maze_narrow")
 for poly in Obstacles:
     fill_polygon(grid, poly)
 
 grid[int(start[0])][int(start[1])] = 0
 grid[int(goal[0])][int(goal[1])] = 0
 
-numIterations = 5000
-stepSize = 10
+numIterations = 10000
+stepSize = 20
 goalRegion = plt.Circle((goal[0], goal[1]), 10, color='r', fill = False)
 
 fig = plt.figure("RRT Algorithm")
@@ -70,7 +70,8 @@ for i in range(rrt.iterations):
         rrt.Nears(rrt.randomTree, new, 40)
         rrt.chooseParent(new)   
         newNode = rrt.addChild(new[0], new[1], i)
-        if i%50==0:
+        if i%100==0:
+            print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
             plt.pause(0.1)   
         rrt.lineDict[(round(rrt.nearestNode.locationX,0),
                       round(rrt.nearestNode.locationY,0), 
