@@ -50,7 +50,7 @@ class RRTalgo():
     
     #sample a random point within grid limits
     def sampleAPoint(self):
-        if np.random.rand() < 0.5:
+        if np.random.rand() < 0.05:
             point = np.array([self.goal.locationX,self.goal.locationY]) 
         else: 
             x = random.randint(1, self.grid.shape[1]-1)
@@ -172,23 +172,23 @@ class RRTalgo():
                 if not self.isInObstacle(Node, newNode_XY):
                     # print(1)
                     # print(self.lineDict)
-                    line_key = (round(Node.parent.locationX, 0), round(Node.parent.locationY, 0), round(Node.locationX, 0), round(Node.locationY, 0))
-                    if line_key in self.lineDict: 
-                        line = self.lineDict.pop(line_key)
-                        line[0].remove()
+                    # line_key = (round(Node.parent.locationX, 0), round(Node.parent.locationY, 0), round(Node.locationX, 0), round(Node.locationY, 0))
+                    # if line_key in self.lineDict: 
+                    #     line = self.lineDict.pop(line_key)
+                    #     line[0].remove()
                         # print(1)
 
                     # plt.plot([Node.parent.locationX, Node.locationX], [Node.parent.locationY, Node.locationY], 'ko', linestyle="-", linewidth=1.5)
                     idx_node = self.findInDict(Node)  
                     self.allNodes[idx_node].parent = newNode
                     self.allNodes[idx_node].cost = temp_cost 
-                    self.lineDict[(round(Node.parent.locationX, 0), 
-                                   round(Node.parent.locationY, 0), 
-                                   round(Node.locationX, 0), 
-                                   round(Node.locationY, 0))] = plt.plot([Node.parent.locationX, Node.locationX], 
-                                                                         [Node.parent.locationY, Node.locationY], 
-                                                                         'bo', markersize = 2, linestyle="-", 
-                                                                         linewidth=0.5, alpha = 0.5)
+                    # self.lineDict[(round(Node.parent.locationX, 0), 
+                    #                round(Node.parent.locationY, 0), 
+                    #                round(Node.locationX, 0), 
+                    #                round(Node.locationY, 0))] = plt.plot([Node.parent.locationX, Node.locationX], 
+                    #                                                      [Node.parent.locationY, Node.locationY], 
+                    #                                                      'bo', markersize = 2, linestyle="-", 
+                    #                                                      linewidth=0.5, alpha = 0.5)
                     # plt.pause(1)
 
 #--------------------ML--------------------------------

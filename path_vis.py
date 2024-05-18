@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np  
 from my_utils import fill_polygon, read_maze_file
  
-start_point, end_point, polygons = read_maze_file('Maze_narrow')
+start_point, end_point, polygons = read_maze_file('Maze_clutter')
 
 rows, cols = 150, 150
 grid = np.zeros((rows, cols))    
@@ -33,7 +33,7 @@ for line in lines:
 # Enable LaTeX rendering
 plt.rc('text', usetex=True)
  
-goalRegion = plt.Circle((end_point[0], end_point[1]),5, color="red", fill = False)
+goalRegion = plt.Circle((end_point[0], end_point[1]), 5, color="red", fill = False)
 plt.gca().add_patch(goalRegion) 
 # plt.text(75, 10, r'$\mathcal{C}_{\mathrm{free}}$', fontsize=12, ha='center', va='top')
 
@@ -42,7 +42,7 @@ plt.gca().add_patch(goalRegion)
 plt.plot(start_point[0], start_point[1], 'go')
 plt.plot(end_point[0], end_point[1], 'ro') 
 
-# plt.plot(x_values, y_values, 'bo-', label=r'$\mathrm{path}$')
+plt.plot(x_values, y_values, 'o-', color='cyan', linewidth = 3)
 # plt.plot(x_values[0], y_values[0], 'go', label = r'$q_{\mathrm{start}}$')
 # plt.plot(x_values[-1], y_values[-1], 'ro', label = r'$q_{\mathrm{goal}}$') 
 # plt.text(x_values[0], y_values[0], r'$q_{\mathrm{start}}$', fontsize=12, ha='right', va='bottom')
@@ -50,12 +50,13 @@ plt.plot(end_point[0], end_point[1], 'ro')
 # plt.legend()
 
 # Remove axes numbers (ticks)
-plt.xticks([])
-plt.yticks([])
-plt.xlim(0,grid.shape[0])
-plt.ylim(0,grid.shape[1])
+# plt.xticks([])
+# plt.yticks([])
+plt.xlim(0,grid.shape[0]-1)
+plt.ylim(0,grid.shape[1]-1)
 # Set axis equal to ensure the circle looks like a circle 
-plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/Maze_narrow.pdf', bbox_inches='tight', pad_inches=0)
-plt.savefig('/home/tsoyarty/Desktop/Bc_work/main/graphs/Maze_narrow/Maze_narrow.pdf', bbox_inches='tight', pad_inches=0)
+# plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/Maze_clutter_final_solution_RRTXstatic.pdf', bbox_inches='tight', pad_inches=0)
+# plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/Maze_clutter_first_solution_RRTXstatic.pdf', bbox_inches='tight', pad_inches=0)
+# plt.savefig('/home/tsoyarty/Desktop/Bc_work/main/graphs/Maze_clutter/Maze_clutter_final_solution_RRTstar.pdf', bbox_inches='tight', pad_inches=0)
     
 plt.show()

@@ -22,6 +22,9 @@
 #include <vector>
 // g++ -I/home/tsoyarty/Desktop/Bc_work/omplapp-1.6.0-Source/ompl/src -I/usr/include/eigen3 optimal_RRTstar.cpp -o optimal_RRTstar -lompl
 
+#include <chrono>
+#include <thread> 
+
 namespace ob = ompl::base;
 namespace og = ompl::geometric;
 using namespace std; 
@@ -185,6 +188,7 @@ void readFromFile(const std::string& filename, Point& startPoint, Point& endPoin
 
 int main()
 { 
+    auto start_time = std::chrono::high_resolution_clock::now();
     // Construct the robot state space in which we're planning. We're
     // planning in [0,1]x[0,1], a subset of R^2.
     ob::StateSpacePtr space(new ob::RealVectorStateSpace(2));
@@ -210,7 +214,7 @@ int main()
     // validityChecker.addPolygonObstacle(polygonVertices3);
     Point startPoint, goalPoint;
     std::vector<std::vector<Point>> polygons;
-    readFromFile("Maze_narrow", startPoint, goalPoint, polygons);
+    readFromFile("Maze_clutter", startPoint, goalPoint, polygons);
 
     // Add polygons to the validity checker and grid
     for (size_t i = 0; i < polygons.size(); ++i) {
@@ -275,7 +279,7 @@ int main()
     //==================================================================================================================
     //==================================================================================================================
 
-    ob::PlannerPtr optimizingPlanner(new og::RRTstar(si));
+    ob::PlannerPtr optimizingPlanner(new og::RRTXstatic(si));
     
     //==================================================================================================================
     //==================================================================================================================
@@ -287,7 +291,7 @@ int main()
 
     // Attempt to solve the planning problem within one second of
     // planning time 
-    ob::PlannerStatus solved = optimizingPlanner->solve(3); 
+    ob::PlannerStatus solved = optimizingPlanner->solve(0.01); 
     
     if (solved)
     {
@@ -307,5 +311,9 @@ int main()
     else    
         std::cout << "Not Found" << std::endl;
     
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end_time - start_time;
+    std::cout << "Time spent: " << duration.count() << " seconds" << std::endl;
+
     return 0;
 }

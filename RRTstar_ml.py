@@ -18,15 +18,15 @@ from my_utils import fill_polygon, read_maze_file
 rows, cols = 150, 150
 grid = np.zeros((rows, cols))   
 
-start, goal, Obstacles = read_maze_file("Maze_narrow")
+start, goal, Obstacles = read_maze_file("Maze_clutter")
 for poly in Obstacles:
     fill_polygon(grid, poly)
 
 grid[int(start[0])][int(start[1])] = 0
 grid[int(goal[0])][int(goal[1])] = 0
 
-numIterations = 10000
-stepSize = 20
+numIterations = 5000
+stepSize = 10
 goalRegion = plt.Circle((goal[0], goal[1]), 10, color='r', fill = False)
 
 fig = plt.figure("RRT Algorithm")
@@ -57,7 +57,7 @@ start_time = time.time()
 # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap4/SimpleMaze.eps', bbox_inches='tight', pad_inches=0)
 # quit()
 # plt.pause(10)
-draw_prediction = True
+draw_prediction = False
 for i in range(rrt.iterations):
     rrt.resetNearestValues()
     # print("Iteration: ",i)
@@ -66,25 +66,28 @@ for i in range(rrt.iterations):
     rrt.findNearest(rrt.randomTree, point)
     new = rrt.steerToPoint(rrt.nearestNode, point)
     bool = rrt.isInObstacle(rrt.nearestNode, new)
+    # if i==100 or i==250 or i==500 or i==1000 or i==1500 or i==2000 or i==2500 or i==5000:
+        # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/Maze_clutter_RRTstarML_learning2'+str(i)+'.pdf', bbox_inches='tight', pad_inches=0)   
+        # plt.pause(1)
     if bool == False:
         rrt.Nears(rrt.randomTree, new, 40)
         rrt.chooseParent(new)   
         newNode = rrt.addChild(new[0], new[1], i)
-        if i%100==0:
-            print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
-            plt.pause(0.1)   
-        rrt.lineDict[(round(rrt.nearestNode.locationX,0),
-                      round(rrt.nearestNode.locationY,0), 
-                      round(new[0],0),round(new[1],0))] = plt.plot([rrt.nearestNode.locationX, new[0]], 
-                                                                   [rrt.nearestNode.locationY, new[1]], 
-                                                                   'bo', markersize=2, linestyle="-", 
-                                                                   linewidth=0.5, alpha = 0.5)
+        # if i%100==0:
+            # print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
+            # plt.pause(0.1)
+        # rrt.lineDict[(round(rrt.nearestNode.locationX,0),
+        #               round(rrt.nearestNode.locationY,0), 
+        #               round(new[0],0),round(new[1],0))] = plt.plot([rrt.nearestNode.locationX, new[0]], 
+        #                                                            [rrt.nearestNode.locationY, new[1]], 
+        #                                                            'bo', markersize=2, linestyle="-", 
+        #                                                            linewidth=0.5, alpha = 0.5)
         rrt.reWire(newNode) 
         # plt.plot([rrt.nearestNode.locationX, new[0]], [rrt.nearestNode.locationY, new[1]], 'bo', linestyle="-", linewidth=0.5)
         
         # print(rrt.lineDict)
         if (rrt.goalFound(new)):
-            rrt.step_size = 5
+            rrt.step_size = 10
             # rrt.addChild(new[0],new[1], i)
             # print("Goal found")
             rrt.resetNearestValues()
@@ -94,10 +97,9 @@ for i in range(rrt.iterations):
             dist_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX,rrt.goal.locationY])
             rrt.goal.cost = rrt.nearestNode.cost + dist_to_goal
             print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
-            # break
-
+          
 end_time = time.time()
-code_time = round(end_time - start_time, 2)
+code_time = round(end_time - start_time, 6)
 
 print(f"Time: {code_time} seconds")
 
@@ -126,7 +128,7 @@ print("Waypoints: ", rrt.Waypoints)
 for i in range(len(rrt.Waypoints)-1):
     plt.plot([rrt.Waypoints[i][0], rrt.Waypoints[i+1][0]],
              [rrt.Waypoints[i][1],rrt.Waypoints[i+1][1],], 
-             'ro', markersize = 5,  linestyle="-", linewidth=2)
+             'bo', linestyle="-", linewidth=3)
     # plt.plot(rrt.Waypoints[i][0], rrt.Waypoints[i][1], 'ro')
     plt.pause(0.1)
 
