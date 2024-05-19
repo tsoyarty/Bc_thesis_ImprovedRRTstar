@@ -33,27 +33,28 @@ def read_and_plot_data(*filenames):
             new_iterations = np.linspace(min(iterations), max(iterations), 1000)
             new_cost = f(new_iterations)
 
-            plt.plot(new_iterations, new_cost, linestyle='-', linewidth=5, alpha=0.5, label=os.path.splitext(os.path.basename(filename))[0])
+            plt.plot(new_iterations, new_cost, linestyle='-', linewidth=2, alpha=1, label=os.path.splitext(os.path.basename(filename))[0])
 
     fontsize_ticks=18
     fontsize_labels=20
 
     plt.xlabel('Iterations', fontsize=fontsize_labels)
-    plt.ylabel('Cost', fontsize=fontsize_labels) 
+    plt.ylabel('Time [s]', fontsize=fontsize_labels) 
     plt.grid(True)
-    plt.xticks(range(0, 5001, 1000), fontsize=fontsize_ticks)  # Set x-axis tick marks every 100
-    plt.yticks(range(0, 500, 10), fontsize=fontsize_ticks)  # Set y-axis tick marks every 50
+    plt.xticks(fontsize=fontsize_ticks)  # Set x-axis tick marks every 100
+    plt.yticks(fontsize=fontsize_ticks)  # Set y-axis tick marks every 50
     # plt.xlim(0,1000)
-    plt.ylim(200, 250)
+    plt.ylim(-0.01, 0.25)
     # plt.gca().set_aspect('equal', adjustable='box')  # Set aspect ratio to be equal
-    plt.legend(fontsize=fontsize_ticks)  # Show legend for all graphs
+    # plt.legend(fontsize=fontsize_ticks)  # Show legend for all graphs
     # plt.savefig('/home/tsoyarty/Desktop/Bc_work/main/graphs/Maze_U/graph_ticks.pdf', bbox_inches='tight', pad_inches=0)
-    # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/graph_U_20pt_ticks.pdf', bbox_inches='tight', pad_inches=0)
+    # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/graph_clutter_learning_time.pdf', bbox_inches='tight', pad_inches=0)
     plt.show()
 
 # Example usage:
-read_and_plot_data('graphs/Maze_U/RRT*_ML.txt','graphs/Maze_U/RRT*.txt','graphs/Maze_U/InformedRRT*.txt','graphs/Maze_U/RRT#.txt', 'graphs/Maze_U/RRTXstatic.txt')
- 
+# read_and_plot_data('graphs/Maze_U/RRT*_ML.txt','graphs/Maze_U/RRT*.txt','graphs/Maze_U/InformedRRT*.txt','graphs/Maze_U/RRT#.txt', 'graphs/Maze_U/RRTXstatic.txt')
+read_and_plot_data('graphs/Maze_clutter/RRT*_ML_learning_time.txt')
+
 # def read_and_plot_data(filename):
 #     iterations = []
 #     cost = []

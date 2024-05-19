@@ -13,7 +13,10 @@ plt.rcParams['font.size'] = 10
 from scipy.stats import gaussian_kde
 
 import time
+from my_utils import read_maze_file 
 
+import os
+import imageio
 
 class treeNode():
     def __init__(self, locationX, locationY, angle):
@@ -54,7 +57,7 @@ class RRTalgo():
         tempNode = treeNode(locationX, locationY, angle)
         self.nearestNode.children.append(tempNode)
         tempNode.parent = self.nearestNode 
-        tempNode.cost = self.nearestNode.cost + self.distance(self.nearestNode, [locationX,locationY,angle])
+        tempNode.cost = self.nearestNode.cost + self.distance(self.nearestNode, [locationX,locationY,angle], 'cost')
         self.allNodes[idx] = tempNode
         # if self.finish:  
         #     self.goal.parent = tempNode
@@ -92,7 +95,8 @@ class RRTalgo():
             # print("ERROR: Unit vector.")
             return True 
         testPoint = np.array([0.0, 0.0])
-        for i in range(self.step_size): 
+        interpol = int(self.distance(locationStart, locationEnd, 'euklid'))
+        for i in range(interpol): 
             testPoint[0] = locationStart.locationX + i*u_hat[0]
             testPoint[1] = locationStart.locationY + i*u_hat[1]
             if np.int64(round(testPoint[1])) >= grid.shape[0] or np.int64(round(testPoint[0])) >= grid.shape[1]:
@@ -100,7 +104,7 @@ class RRTalgo():
             if self.grid[np.int64(round(testPoint[1])), np.int64(round(testPoint[0]))] == 1:
                 return True
              
-            t = i/(self.step_size)
+            t = i/(interpol)
             actualX = startX*(1-t) + t*endX
             actualY = startY*(1-t) + t*endY
             actualAngle = startAngle*(1-t) + t*endAngle
@@ -128,7 +132,7 @@ class RRTalgo():
     #find unit vector between 2 points which from a vector
     def unitVector(self, locationStart, locationEnd):
         v = np.array([locationEnd[0] - locationStart.locationX, locationEnd[1] - locationStart.locationY])
-        u_hat = 0
+        u_hat = [0,0]
         if np.linalg.norm(v) != 0:
             u_hat = v/np.linalg.norm(v)
         return u_hat
@@ -137,7 +141,7 @@ class RRTalgo():
     def findNearest(self, root, point):
         if not root:
             return
-        dist = self.distance(root, point)
+        dist = self.distance(root, point, 'cost')
         if dist <= self.nearestDist:
             self.nearestNode = root
             self.nearestDist = dist
@@ -146,13 +150,18 @@ class RRTalgo():
         pass
 
     #find euclidean distance between  a node and an XY point
-    def distance(self, node1, point):
-        dist = np.sqrt((node1.locationX - point[0])**2 + (node1.locationY - point[1])**2 + 0.01*(node1.angle - point[2])**2)
-        return round(dist,2)
+    def distance(self, node1, point, mode):
+        if mode == 'cost':
+            dist = np.sqrt((node1.locationX - point[0])**2 + (node1.locationY - point[1])**2 + 0.1*(node1.angle - point[2])**2)
+            return round(dist,2)
+        if mode == 'euklid':
+            return np.sqrt((node1.locationX - point[0])**2 + (node1.locationY - point[1])**2)
+        print("WARNING: Choose mode")
+        return 0
     
     #check if the goal has been reached within step size
     def goalFound(self, point):
-        if self.distance(self.goal, point) <= self.step_size:
+        if self.distance(self.goal, point, 'cost') <= self.step_size:
             self.finish = True
             return True
         pass
@@ -177,7 +186,7 @@ class RRTalgo():
     def Nears(self, root, point, radius):
         if not root: 
             return
-        dist = self.distance(root, point)
+        dist = self.distance(root, point, 'cost')
         if dist <= radius:
             self.nearestNodes.append(root) 
         for child in root.children:  
@@ -190,7 +199,7 @@ class RRTalgo():
         dlist = []
         for Node in self.nearestNodes: 
             if not self.isInObstacle(Node, newNode):
-                dlist.append(Node.cost + self.distance(Node, newNode))
+                dlist.append(Node.cost + self.distance(Node, newNode, 'cost'))
             else:
                 dlist.append(float("inf"))
         mincost = min(dlist) 
@@ -206,28 +215,28 @@ class RRTalgo():
     def reWire(self, newNode):
         newNode_XY = [newNode.locationX, newNode.locationY, newNode.angle]
         for Node in self.nearestNodes:
-            temp_cost = newNode.cost + self.distance(Node, newNode_XY)
+            temp_cost = newNode.cost + self.distance(Node, newNode_XY, 'cost')
             if temp_cost < Node.cost:
                 if not self.isInObstacle(Node, newNode_XY):
                     # print(1)
                     # print(self.lineDict)
-                    line_key = (round(Node.parent.locationX, 0), round(Node.parent.locationY, 0), round(Node.locationX, 0), round(Node.locationY, 0))
-                    if line_key in self.lineDict: 
-                        line = self.lineDict.pop(line_key)
-                        line[0].remove()
+                    # line_key = (round(Node.parent.locationX, 0), round(Node.parent.locationY, 0), round(Node.locationX, 0), round(Node.locationY, 0))
+                    # if line_key in self.lineDict: 
+                    #     line = self.lineDict.pop(line_key)
+                    #     line[0].remove()
                         # print(1)
 
                     # plt.plot([Node.parent.locationX, Node.locationX], [Node.parent.locationY, Node.locationY], 'ko', linestyle="-", linewidth=1.5)
                     idx_node = self.findInDict(Node) 
                     self.allNodes[idx_node].parent = newNode
                     self.allNodes[idx_node].cost = temp_cost 
-                    self.lineDict[(round(Node.parent.locationX, 0), 
-                                   round(Node.parent.locationY, 0), 
-                                   round(Node.locationX, 0), 
-                                   round(Node.locationY, 0))] = plt.plot([Node.parent.locationX, Node.locationX], 
-                                                                         [Node.parent.locationY, Node.locationY], 
-                                                                         'bo', markersize = 2, linestyle="-", 
-                                                                         linewidth=0.5, alpha = 0.5)
+                    # self.lineDict[(round(Node.parent.locationX, 0), 
+                    #                round(Node.parent.locationY, 0), 
+                    #                round(Node.locationX, 0), 
+                    #                round(Node.locationY, 0))] = plt.plot([Node.parent.locationX, Node.locationX], 
+                    #                                                      [Node.parent.locationY, Node.locationY], 
+                    #                                                      'bo', markersize = 2, linestyle="-", 
+                    #                                                      linewidth=0.5, alpha = 0.5)
                     # plt.pause(1)
 
 #--------------------ML--------------------------------
@@ -330,8 +339,7 @@ class RRTalgo():
             x = self.sampleDensity()
             if cnt == 2:
                 x = self.sampleAPoint()
-                break 
-
+                break  
         if not self.OnObstacle(x):
             self.appendSpace(x,"free") 
         return x 
@@ -387,39 +395,43 @@ def paint_area(polygon, point, area_clr, alpha):
 
 '''--------------------------PARAMETERS-------------------------------'''
 rows, cols = 150, 150
+
+start, goal, Obstacles = read_maze_file("Maze_E")
+
 grid = np.zeros((rows, cols))    
-start = np.array([80.0, 20.0, 28])
-# goal = np.array([grid.shape[1]-750, grid.shape[0]-750, 67]) 
-goal = np.array([grid.shape[1]-71, grid.shape[0]-60, 67]) 
+start = np.append(start, np.array([28]))
+goal = np.append(goal, np.array([67])) 
+# goal = np.array([grid.shape[1]-71, grid.shape[0]-60, 67]) 
 # goal = np.array([400.0, 1000.0, 113]) 
 
 grid[int(start[0])][int(start[1])] = 0
 grid[int(goal[0])][int(goal[1])] = 0
 
-numIterations = 1000
+numIterations = 10001
 stepSize = 10
-goalRegion = plt.Circle((goal[0], goal[1]), stepSize, color='r', fill = False)
+# goalRegion = plt.Circle((goal[0], goal[1]), stepSize, color='r', fill = False)
 smooth = 10
 
 fig = plt.figure("RRT Algorithm")
 plt.imshow(grid, cmap='binary')
-plt.plot(start[0], start[1], 'bo')
-plt.plot(goal[0], goal[1], 'ro')
+# plt.plot(start[0], start[1], 'bo')
+# plt.plot(goal[0], goal[1], 'ro')
 ax = fig.gca()
 # ax.add_patch(goalRegion)
 # plt.xlabel('X-axis $(m)$')
 # plt.ylabel('Y-axis $(m)$') 
-plt.xticks([])
-plt.yticks([]) 
-plt.xlim(0,150)
-plt.ylim(0,150)
+# plt.xticks([])
+# plt.yticks([]) 
+plt.xlim(0,grid.shape[0]-1)
+plt.ylim(0,grid.shape[1]-1)
 '''---------------------------------------------------------------------'''
 
 
 
 
 '''------------------------------POLYGONS-------------------------------'''
-polygonL = np.array([(0, 0), (0, 12), (4, 12), (4, 4), (8, 4), (8, 0)])
+polygonL = np.array([(0, 0), (0, 12), (4, 12), (4, 4), (8, 4), (8, 0)])*1.6
+polygonI = np.array([(0, 0), (0, 15), (4, 15), (4, 0)])*0.7
 polygonO = np.array([(0, 0), (0, 160), (160, 160), (160, 0)])
 polygonStar = np.array([
     (0, 5), (1, 1), (5, 1), (2, -1), (3, -5),
@@ -431,15 +443,16 @@ polygonStar = np.array([
 
 
 '''---------------------------OBSTACLES----------------------------------'''
-obstacleI1 = np.array([(30,0),(30,67),(120,67),(120,0)])
-obstacleI2 = obstacleI1 + np.array([0,83])
-obstacleI3 = np.array([(105,50),(105,130),(125,130),(125,50)]) 
+# obstacleI1 = np.array([(30,0),(30,67),(120,67),(120,0)])
+# obstacleI2 = obstacleI1 + np.array([0,83])
+# obstacleI3 = np.array([(105,50),(105,130),(125,130),(125,50)]) 
 
-obstacleU1 = np.array([(35,50),(115,50),(115,70),(35,70)])
-obstacleU2 = np.array([(35,50),(55,50),(55,130),(35,130)])
-obstacleU3 = np.array([(105,50),(125,50),(125,130),(105,130)])
+# obstacleU1 = np.array([(35,50),(115,50),(115,70),(35,70)])
+# obstacleU2 = np.array([(35,50),(55,50),(55,130),(35,130)])
+# obstacleU3 = np.array([(105,50),(125,50),(125,130),(105,130)])
 
-Obstacles = [obstacleU1,obstacleU2,obstacleU3]
+# Obstacles = [obstacleU1,obstacleU2,obstacleU3]
+# print(Obstacles)
 for i in range (len(Obstacles)):
     x, y = Obstacles[i].T
     plt.fill(x, y, color='black')  
@@ -450,7 +463,7 @@ for i in range (len(Obstacles)):
 
 
 '''-------------------------MAIN FIGURE------------------------------------'''
-polygon = polygonStar
+polygon = polygonL
 paint_area(polygon, start, 'purple', 0.5)
 paint_area(polygon, goal, 'red', 0.5)
 '''------------------------------------------------------------------------'''
@@ -463,49 +476,58 @@ start_time = time.time()
 '''---------------------------------RRT------------------------------------'''
 rrt = RRTalgo(start, goal, numIterations, grid, stepSize, polygon, Obstacles, smooth) 
 rrt.adaptiveSampling()
-
+# plt.pause(1)  
 draw_prediction = True
 for i in range(rrt.iterations):
+    # if i%10==0:
+        # print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
+        # plt.pause(0.1)
     rrt.resetNearestValues()
     print("Iteration: ",i)
-    # point = rrt.sampleAPoint()
-    point = rrt.mlSample()
+    point = rrt.sampleAPoint()
+    # start_time_sample = time.time()
+    # point = rrt.mlSample()
+    # end_time_sample = time.time()
+    # if i%10 == 0:
+        # code_time = round(end_time_sample - start_time_sample, 6)
+        # print(f"RRT*_ML: time: {code_time}; iterations: {i}")
     rrt.findNearest(rrt.randomTree, point)
     new = rrt.steerToPoint(rrt.nearestNode, point)
     bool = rrt.isInObstacle(rrt.nearestNode, new)
     if bool == False:
-        rrt.Nears(rrt.randomTree, new, rrt.step_size*4)
+        rrt.Nears(rrt.randomTree, new, 40)
         rrt.chooseParent(new)   
         newNode = rrt.addChild(new[0], new[1], new[2], i) 
-        if i%100==0:
-            plt.pause(0.1)  
-        rrt.lineDict[(round(rrt.nearestNode.locationX,0),
-                      round(rrt.nearestNode.locationY,0), 
-                      round(new[0],0),round(new[1],0))] = plt.plot([rrt.nearestNode.locationX, new[0]], 
-                                                                   [rrt.nearestNode.locationY, new[1]], 
-                                                                   'bo', markersize=2, linestyle="-", 
-                                                                   linewidth=0.5, alpha = 0.5)
+        # if i%100==0:
+        # plt.pause(0.1)  
+        # rrt.lineDict[(round(rrt.nearestNode.locationX,0),
+        #               round(rrt.nearestNode.locationY,0), 
+        #               round(new[0],0),round(new[1],0))] = plt.plot([rrt.nearestNode.locationX, new[0]], 
+        #                                                            [rrt.nearestNode.locationY, new[1]], 
+                                                                #    'bo', markersize=2, linestyle="-", 
+                                                                #    linewidth=0.5, alpha = 0.5)
         rrt.reWire(newNode) 
         if (rrt.goalFound(new)):
+            # rrt.step_size = 20
             # rrt.addChild(new[0], new[1], new[2], i)
             # print("Goal found")
             rrt.resetNearestValues()
-            rrt.Nears(rrt.randomTree, [rrt.goal.locationX, rrt.goal.locationY,rrt.goal.angle], rrt.step_size)
+            rrt.Nears(rrt.randomTree, [rrt.goal.locationX, rrt.goal.locationY,rrt.goal.angle], 40)
             rrt.chooseParent([rrt.goal.locationX, rrt.goal.locationY,rrt.goal.angle])
             rrt.goal.parent = rrt.nearestNode
-            dist_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX,rrt.goal.locationY,rrt.goal.angle])
-            rrt.goal.cost = rrt.nearestNode.cost + dist_to_goal
-            print(rrt.goal.cost)
-            # break
+            cost_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX,rrt.goal.locationY,rrt.goal.angle], 'cost')
+            rrt.goal.cost = rrt.nearestNode.cost + cost_to_goal
+            # print(rrt.goal.cost)
+            break
 
 rrt.resetNearestValues()
 rrt.Nears(rrt.randomTree, [rrt.goal.locationX, rrt.goal.locationY, rrt.goal.angle], rrt.step_size)
 rrt.chooseParent([rrt.goal.locationX, rrt.goal.locationY, rrt.goal.angle])
 rrt.goal.parent = rrt.nearestNode
-dist_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX, rrt.goal.locationY, rrt.goal.angle])
-rrt.goal.cost = rrt.nearestNode.cost + dist_to_goal
+cost_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX, rrt.goal.locationY, rrt.goal.angle], 'cost')
+rrt.goal.cost = rrt.nearestNode.cost + cost_to_goal
 
-print([rrt.nearestNode.locationX,  rrt.nearestNode.locationY, rrt.goal.angle], rrt.goal.cost, dist_to_goal)
+print([rrt.nearestNode.locationX,  rrt.nearestNode.locationY, rrt.goal.angle], rrt.goal.cost, cost_to_goal)
 
 rrt.retraceRRTPath(rrt.goal)
 rrt.Waypoints.insert(0,start)
@@ -526,13 +548,14 @@ for i in range(len(rrt.Waypoints)-1):
     plt.plot(
         [rrt.Waypoints[i][0], rrt.Waypoints[i+1][0]],
         [rrt.Waypoints[i][1],rrt.Waypoints[i+1][1],],
-        'ro', linestyle="-", markersize=5, linewidth=2,
+        'bo', linestyle="-", markersize=5, linewidth=2,
         )  
     startX, startY, startAngle = rrt.Waypoints[i][0], rrt.Waypoints[i][1], np.radians(rrt.Waypoints[i][2])
     endX, endY, endAngle = rrt.Waypoints[i+1][0], rrt.Waypoints[i+1][1], np.radians(rrt.Waypoints[i+1][2]) 
-    for j in range(stepSize+1): 
-        if (j % 5) == 0:
-            t = j/(stepSize)
+    interpol = int(np.sqrt((startX - endX)**2 + (startY - endY)**2 + 0.1*(startAngle - endAngle)**2))+1
+    for j in range(interpol+1): 
+        if (j % 10) == 0:
+            t = j/(interpol)
             actualX = startX*(1-t) + t*endX
             actualY = startY*(1-t) + t*endY
             actualAngle = startAngle*(1-t) + t*endAngle
@@ -551,15 +574,16 @@ for i in range(len(rrt.Waypoints)-1):
             plt.pause(0.1) 
             # L.remove()
             # F.remove() 
+
 L, = plt.plot(x, y, color='black') 
 F, = plt.fill(x, y, color='purple', alpha=0.5)
 
 
-for i in range(10):
+for i in range(5):
     print(i)
     plt.pause(1)
 
-# plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap4/RRTstar2DML_maze'+str(rrt.goal.cost)+'.pdf', bbox_inches='tight', pad_inches=0)
+plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap5/RRTstar_ML_Maze_E_2D_solution.pdf', bbox_inches='tight', pad_inches=0)
 
 if draw_prediction:
     for i in range(len(rrt.obsSpace)): 
@@ -570,7 +594,7 @@ if draw_prediction:
 # plt.savefig('/home/tsoyarty/Desktop/Bc_work/Documentation/figChap4/RRTstar2DML_learning'+str(rrt.goal.cost)+'.pdf', bbox_inches='tight', pad_inches=0)
 plt.pause(30)
 
-plt.imshow(grid, cmap='binary')
+# plt.imshow(grid, cmap='binary')
 # plt.colorbar()  # Add a colorbar for reference (optional)
 plt.show()
 # quit()

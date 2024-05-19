@@ -259,6 +259,7 @@ class RRTalgo():
 
 
     def mlSample(self):
+        # start_time = time.time()
         x = self.sampleDensity()
         cnt = 0 
         while self.OnObstacle(x):
@@ -272,6 +273,9 @@ class RRTalgo():
         # print(cnt)
         if not self.OnObstacle(x):
             self.appendSpace(x,"free") 
+        # end_time = time.time()
+        # code_time = round(end_time - start_time, 6)
+        # print(f"Time spent to generate sample: {code_time} seconds")
         return x
 
     

@@ -62,7 +62,12 @@ for i in range(rrt.iterations):
     rrt.resetNearestValues()
     # print("Iteration: ",i)
     # point = rrt.sampleAPoint()
+    start_time_sample = time.time()
     point = rrt.mlSample()
+    end_time_sample = time.time()
+    # if i%10 == 0:
+    #     code_time = round(end_time_sample - start_time_sample, 6)
+    #     print(f"RRT*_ML: time: {code_time}; iterations: {i}")
     rrt.findNearest(rrt.randomTree, point)
     new = rrt.steerToPoint(rrt.nearestNode, point)
     bool = rrt.isInObstacle(rrt.nearestNode, new)
@@ -96,7 +101,7 @@ for i in range(rrt.iterations):
             rrt.goal.parent = rrt.nearestNode
             dist_to_goal = rrt.distance(rrt.nearestNode, [rrt.goal.locationX,rrt.goal.locationY])
             rrt.goal.cost = rrt.nearestNode.cost + dist_to_goal
-            print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
+            # print(f"RRTstar_ml: cost: {round(rrt.goal.cost,2)}; iterations: {i}")
           
 end_time = time.time()
 code_time = round(end_time - start_time, 6)
